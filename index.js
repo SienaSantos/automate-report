@@ -70,8 +70,11 @@ app.get('/test', function(req,res){
 app.get('/test-email', function(req,res){
   var email = 'sienasantos18@gmail.com'
   var subject = 'Testing Automation EMail sample'
-  var body = '<p>Report emailing test.</p>  Time: '+new Date();
-  emailApi.sendEmailGeneral(email, subject, body)
+  var body = '<p>Report emailing test as of</p>  Time: '+new Date();
+  emailApi.sendEmailGeneral(email, subject, body, function(resp){
+    console.log('resp ', resp)
+    res.send(resp)
+  })
 })
 
 
@@ -79,19 +82,24 @@ app.get('/test-email', function(req,res){
 app.get('/generate', function(req,res){
   service.generateLabCash(function(data){
     console.log('callback ', data)
-    var xls = json2xls(data.result);
-    fs.writeFileSync('./reports/labcash/data.xlsx', xls, 'binary', function(err){
-      if(err){
-        console.log('error on creating lab cash report into xlsx: ', err)
-      }else{
-        console.log('success creating lab cash report into xlsx')
-        // var email = 'sienasantos18@gmail.com'
-        // var subject = 'Testing Automation EMail sample'
-        // var body = '<p>Report emailing test.</p>  Time: '+new Date();
-        // emailApi.sendEmailGeneral(email, subject, body)
-      }
-    });
-    res.send('sucess')
+    if(data.status == 'success'){
+      var xls = json2xls(data.result);
+      fs.writeFileSync('./reports/labcash/data.xlsx', xls, 'binary', function(err){
+        if(err){
+          console.log('error on creating lab cash report into xlsx: ', err)
+        }else{
+          console.log('success creating lab cash report into xlsx')
+          var email = 'sienasantos18@gmail.com'
+          var subject = 'Testing Automation EMail sample'
+          var body = '<p>Report emailing test as of </p>  Time: '+new Date();
+          emailApi.sendEmailGeneral(email, subject, body)
+        }
+      });
+
+    } else {
+      console.log('result : ', data)
+    }
+
   })
 })
 
